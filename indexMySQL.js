@@ -28,6 +28,19 @@ app.get(apiversion + '/books',  function (req, res)  {
 
   
 });
+app.get(apiversion + '/student',  function (req, res)  {  
+
+  res.setHeader('Content-Type', 'application/json');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  
+  db.query('SELECT * FROM student', function (error, results, fields) {
+      if (error) throw error;
+      return res.send({ error: false, message: 'student', data: results });
+  });
+
+  
+});
 
 //Get book by id
 app.get(apiversion + '/book/:bookid',  function (req, res)  {  
@@ -46,6 +59,7 @@ app.get(apiversion + '/book/:bookid',  function (req, res)  {
 
 
 });
+
 
 
 //Delete book by id
@@ -165,6 +179,33 @@ app.put(apiversion + '/book/:bookid',  function (req, res) {
   });
 
 });
+app.put(apiversion + '/student/:studentId',  function (req, res)  {  
+
+  var studentId = req.body.studentId;
+  var studentName = req.body.studentName;
+
+
+  res.setHeader('Content-Type', 'application/json');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+  
+  db.query(`UPDATE student 
+            Set
+               studentId = '${studentId}',
+               studentName = '${studentName}'
+  
+            where studentId='${studentId}';`,function (error, results, fields) {
+    if (error) throw error;
+    return res.send({ error: false, message: ' Modified student' });
+   });
+
+});
+        
+
+
+   
+
 
 
 
@@ -204,7 +245,24 @@ app.delete(apiversion + '/book/:bookid',  function (req, res) {
       if (error) throw error;
       return res.send({ error: false, message: ' Modified book' });
   });
+});
 
+
+
+//Edit book by id
+app.delete(apiversion + '/student/:studentId',  function (req, res)  {  
+
+  var studentId = req.params.studentId;
+
+  res.setHeader('Content-Type', 'application/json');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+  
+  db.query(`DELETE from student WHERE studentId =${studentId};`,function (error, results, fields) {
+      if (error) throw error;
+      return res.send({ error: false, message: ' Modified student' });
+  });
   
 
   
