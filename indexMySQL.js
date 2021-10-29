@@ -1,8 +1,10 @@
 var express = require('express');
 var cors = require('cors');
 var bodyParser = require('body-parser');
+var fileUpload = require('express-fileupload');
 
 var apiversion='/api/v1';
+var bookpicturepath ='D:/Testlab/VueJsBookShopLab/src/assets/bookImages/';
 
 
 //MYSQL Connection
@@ -13,6 +15,9 @@ var port = process.env.PORT || 3000;
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+
+
+app.use(fileUpload());
 
 //Get all books
 app.get(apiversion + '/books',  function (req, res)  {  
@@ -226,6 +231,26 @@ app.post(apiversion + '/student',  function (req, res) {
 
 
 });
+app.post(apiversion + '/upload', (req, res) => {
+ 
+  if (!req.files) {
+      return res.status(500).send({ msg: "file is not found" })
+  }
+
+  const myFile = req.files.file;
+ 
+  myFile.mv(`${bookpicturepath}${myFile.name}`, function (err) {
+   
+      if (err) {
+          console.log(err)
+          return res.status(500).send({ msg: "Error occured" });
+      }
+     
+      return res.send({name: myFile.name, path: `/${myFile.name}`});
+
+  });
+
+});
 
 
 
@@ -263,6 +288,8 @@ app.delete(apiversion + '/student/:studentId',  function (req, res)  {
       if (error) throw error;
       return res.send({ error: false, message: ' Modified student' });
   });
+
+  
   
 
   
