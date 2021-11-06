@@ -3,12 +3,20 @@ var cors = require('cors');
 var bodyParser = require('body-parser');
 var fileUpload = require('express-fileupload');
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 var apiversion='/api/v1';
-var bookpicturepath ='D:/Testlab/VueJsBookShopLab/src/assets/bookImages/';
+//var bookpicturepath ='D:/Testlab/VueJsBookShopLab/src/assets/bookImages/';
+var bookpicturepath=process.env.IMAGE_PATH;
+const secretkey=process.env.SECRET
 
 
 //MYSQL Connection
 var db = require('./config/db.config');
+
+const bcrypt = require('bcryptjs');
+const {sign,verify}  = require('./middleware.js');
 
 
 var port = process.env.PORT || 3000;
@@ -20,7 +28,10 @@ app.use(cors());
 app.use(fileUpload());
 
 //Get all books
-app.get(apiversion + '/books',  function (req, res)  {  
+app.get(apiversion + '/books',verify,  function (req, res)  {  
+
+  try
+  {
 
   res.setHeader('Content-Type', 'application/json');
   res.header("Access-Control-Allow-Origin", "*");
@@ -31,9 +42,16 @@ app.get(apiversion + '/books',  function (req, res)  {
       return res.send({ error: false, message: 'books list', data: results });
   });
 
+}catch{
+  return res.status(401).send()
+
+}
+
   
 });
-app.get(apiversion + '/student',  function (req, res)  {  
+app.get(apiversion + '/student', verify, function (req, res)  {  
+
+  try{
 
   res.setHeader('Content-Type', 'application/json');
   res.header("Access-Control-Allow-Origin", "*");
@@ -43,14 +61,16 @@ app.get(apiversion + '/student',  function (req, res)  {
       if (error) throw error;
       return res.send({ error: false, message: 'student', data: results });
   });
-
+  }catch{
+    return res.status(401).send("False")
+  }
   
 });
 
 //Get book by id
-app.get(apiversion + '/book/:bookid',  function (req, res)  {  
+app.get(apiversion + '/book/:bookid',verify,  function (req, res)  {  
 
-
+try{
   res.setHeader('Content-Type', 'application/json');
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -61,6 +81,9 @@ app.get(apiversion + '/book/:bookid',  function (req, res)  {
       if (error) throw error;
       return res.send({ error: false, message: 'book id =' + bookid.toString(), data: results });
   });
+}catch{
+  return res.status(401).send("Login False")
+}
 
 
 });
@@ -68,7 +91,8 @@ app.get(apiversion + '/book/:bookid',  function (req, res)  {
 
 
 //Delete book by id
-app.get(apiversion + '/student/:studentId',  function (req, res)  { 
+app.get(apiversion + '/student/:studentId',verify,  function (req, res)  { 
+  try{
   res.setHeader('Content-Type', 'application/json');
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -83,6 +107,9 @@ app.get(apiversion + '/student/:studentId',  function (req, res)  {
   
   
   });
+}catch{
+  return res.status(401).send("False")
+}
 
   
 
@@ -93,9 +120,9 @@ app.get(apiversion + '/student/:studentId',  function (req, res)  {
 
 
 //Add new book
-app.post(apiversion + '/book',  function (req, res)  {  
+app.post(apiversion + '/book', verify, function (req, res)  {  
 
-
+try{
   var title = req.body.title; 	
   var price=req.body.price;
 	var isbn = req.body.isbn;
@@ -120,6 +147,9 @@ app.post(apiversion + '/book',  function (req, res)  {
       if (error) throw error;
       return res.send({ error: false, message: 'Insert new book' });
   });
+}catch{
+  return res.status(401).send("False")
+}
 
 
 });
@@ -127,8 +157,9 @@ app.post(apiversion + '/book',  function (req, res)  {
 
 
 //Edit book by id
-app.post(apiversion + '/student',  function (req, res) {
+app.post(apiversion + '/student', verify, function (req, res) {
 
+  try{
   var studentId = req.body.studentId
   var studentName = req.body.studentName
 
@@ -139,7 +170,10 @@ app.post(apiversion + '/student',  function (req, res) {
   db.query(`INSERT INTO student (studentId,studentName) VALUES ('${studentId}','${studentName}');`,function (error, results, fields) {
     if (error) throw error;
     return res.send({ error: false, message: 'Insert new student' });
-  }); 
+  });
+  }catch{
+    return res.status(401).send("False")
+  } 
 
 
 });
@@ -147,8 +181,9 @@ app.post(apiversion + '/student',  function (req, res) {
 
 
 //Edit book by id
-app.put(apiversion + '/book/:bookid',  function (req, res) {
+app.put(apiversion + '/book/:bookid',verify,  function (req, res) {
 
+  try{
   var title = req.body.title; 	
   var price=req.body.price;
 	var isbn = req.body.isbn;
@@ -182,10 +217,16 @@ app.put(apiversion + '/book/:bookid',  function (req, res) {
       if (error) throw error;
       return res.send({ error: false, message: ' Modified book' });
   });
+}catch{
+  return res.status(401).send("False")
+}
 
 });
-app.put(apiversion + '/student/:studentId',  function (req, res)  {  
 
+
+app.put(apiversion + '/student/:studentId',verify,  function (req, res)  {  
+
+  try{
   var studentId = req.body.studentId;
   var studentName = req.body.studentName;
 
@@ -204,8 +245,100 @@ app.put(apiversion + '/student/:studentId',  function (req, res)  {
     if (error) throw error;
     return res.send({ error: false, message: ' Modified student' });
    });
+  }catch{
+    return res.status(401).send("False")
+  }
 
 });
+
+app.post(apiversion + '/auth/register', (req, res) => {
+
+  const hashedPassword = bcrypt.hashSync(req.body.password,10);
+
+  let user={
+      username: req.body.username,
+      role: req.body.role,
+      password: hashedPassword,
+  }
+
+  res.setHeader('Content-Type', 'application/json');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+
+  try {
+
+    db.query(`INSERT INTO users 
+      (username,password,role) 
+      VALUES ( '${user.username}','${hashedPassword}','${user.role}');`,function (error, results, fields) {
+        if (error) throw error;
+        return res.status(201).send({ error: false, message: 'created a user' })  
+    });
+
+ }
+ catch(err) 
+ {
+
+   return res.send(err)
+   
+ }
+
+});
+
+app.post(apiversion + '/auth/signin', (req, res) => {
+
+  db.query('SELECT * FROM users where username=?',req.body.username, function (error, results, fields) {
+
+    try
+    {
+      if (error) {
+
+        throw error;
+
+      }else{
+
+      
+        let hashedPassword=results[0].password
+        const correct =bcrypt.compareSync(req.body.password, hashedPassword)
+
+        if (correct)
+        {
+          let user={
+            username: req.body.username,
+            role: results.role,
+            password: hashedPassword,
+          }
+
+          // create a token
+          let token = sign(user, secretkey);
+          
+          res.setHeader('Content-Type', 'application/json');
+          res.header("Access-Control-Allow-Origin", "*");
+          res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+          return res.status(201).send({ error: false, message: 'user sigin', accessToken: token });
+
+        }else {
+
+          return res.status(401).send("login fail")
+
+        }
+
+      }
+
+    }
+    catch(e)
+    {
+      return res.status(401).send("login fail")
+    }
+    
+  });
+
+  
+  
+
+});
+
         
 
 
@@ -215,8 +348,9 @@ app.put(apiversion + '/student/:studentId',  function (req, res)  {
 
 
 //Edit book by id
-app.post(apiversion + '/student',  function (req, res) {
+app.post(apiversion + '/student', verify, function (req, res) {
 
+  try{
   var studentId = req.body.studentId
   var studentName = req.body.studentName
 
@@ -228,11 +362,15 @@ app.post(apiversion + '/student',  function (req, res) {
     if (error) throw error;
     return res.send({ error: false, message: 'Insert new student' });
   }); 
+}catch{
+  return res.status(401).send("False")
+}
 
 
 });
-app.post(apiversion + '/upload', (req, res) => {
+app.post(apiversion + '/upload',verify, (req, res) => {
  
+  try{
   if (!req.files) {
       return res.status(500).send({ msg: "file is not found" })
   }
@@ -249,14 +387,18 @@ app.post(apiversion + '/upload', (req, res) => {
       return res.send({name: myFile.name, path: `/${myFile.name}`});
 
   });
+}catch{
+  return res.status(401).send("False")
+}
 
 });
 
 
 
 //Edit book by id
-app.delete(apiversion + '/book/:bookid',  function (req, res) {
+app.delete(apiversion + '/book/:bookid', verify, function (req, res) {
 
+  try{
 
   var bookid = req.params.bookid;
 
@@ -270,13 +412,17 @@ app.delete(apiversion + '/book/:bookid',  function (req, res) {
       if (error) throw error;
       return res.send({ error: false, message: ' Modified book' });
   });
+}catch{
+  return res.status(401).send("False")
+}
 });
 
 
 
 //Edit book by id
-app.delete(apiversion + '/student/:studentId',  function (req, res)  {  
+app.delete(apiversion + '/student/:studentId', verify, function (req, res)  {  
 
+  try{
   var studentId = req.params.studentId;
 
   res.setHeader('Content-Type', 'application/json');
@@ -288,6 +434,9 @@ app.delete(apiversion + '/student/:studentId',  function (req, res)  {
       if (error) throw error;
       return res.send({ error: false, message: ' Modified student' });
   });
+}catch{
+  return res.status(401).send("False")
+}
 
   
   
