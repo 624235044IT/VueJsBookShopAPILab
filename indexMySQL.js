@@ -8,8 +8,8 @@ dotenv.config();
 
 var apiversion='/api/v1';
 //var bookpicturepath ='D:/Testlab/VueJsBookShopLab/src/assets/bookImages/';
-var bookpicturepath=process.env.IMAGE_PATH;
-const secretkey=process.env.SECRET
+var bookpicturepath= process.env.IMAGE_PATH;
+const secretkey= process.env.SECRET;
 
 
 //MYSQL Connection
@@ -23,8 +23,6 @@ var port = process.env.PORT || 3000;
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-
-
 app.use(fileUpload());
 
 //Get all books
@@ -62,7 +60,7 @@ app.get(apiversion + '/student', verify, function (req, res)  {
       return res.send({ error: false, message: 'student', data: results });
   });
   }catch{
-    return res.status(401).send("False")
+    return res.status(401).send()
   }
   
 });
@@ -82,7 +80,7 @@ try{
       return res.send({ error: false, message: 'book id =' + bookid.toString(), data: results });
   });
 }catch{
-  return res.status(401).send("Login False")
+  return res.status(401).send()
 }
 
 
@@ -108,7 +106,7 @@ app.get(apiversion + '/student/:studentId',verify,  function (req, res)  {
   
   });
 }catch{
-  return res.status(401).send("False")
+  return res.status(401).send()
 }
 
   
@@ -148,7 +146,7 @@ try{
       return res.send({ error: false, message: 'Insert new book' });
   });
 }catch{
-  return res.status(401).send("False")
+  return res.status(401).send()
 }
 
 
@@ -172,7 +170,7 @@ app.post(apiversion + '/student', verify, function (req, res) {
     return res.send({ error: false, message: 'Insert new student' });
   });
   }catch{
-    return res.status(401).send("False")
+    return res.status(401).send()
   } 
 
 
@@ -218,7 +216,7 @@ app.put(apiversion + '/book/:bookid',verify,  function (req, res) {
       return res.send({ error: false, message: ' Modified book' });
   });
 }catch{
-  return res.status(401).send("False")
+  return res.status(401).send()
 }
 
 });
@@ -246,7 +244,7 @@ app.put(apiversion + '/student/:studentId',verify,  function (req, res)  {
     return res.send({ error: false, message: ' Modified student' });
    });
   }catch{
-    return res.status(401).send("False")
+    return res.status(401).send()
   }
 
 });
@@ -285,6 +283,7 @@ app.post(apiversion + '/auth/register', (req, res) => {
 
 });
 
+//API ลงชื่อเข้าใช้งาน
 app.post(apiversion + '/auth/signin', (req, res) => {
 
   db.query('SELECT * FROM users where username=?',req.body.username, function (error, results, fields) {
